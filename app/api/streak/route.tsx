@@ -33,7 +33,7 @@ export async function GET(request: NextRequest) {
           Missing username parameter
         </div>
       ),
-      { width: 800, height: 150 }
+      { width: 800, height: 250 }
     );
   }
 
@@ -60,7 +60,7 @@ export async function GET(request: NextRequest) {
             User not found
           </div>
         ),
-        { width: 800, height: 150 }
+        { width: 800, height: 250 }
       );
     }
 
@@ -139,7 +139,7 @@ export async function GET(request: NextRequest) {
       ),
       {
         width: 800,
-        height: 150,
+        height: 250,
         headers: {
           'Cache-Control': 'public, max-age=14400, s-maxage=14400',
         },
@@ -164,7 +164,7 @@ export async function GET(request: NextRequest) {
           Error generating image
         </div>
       ),
-      { width: 800, height: 150 }
+      { width: 800, height: 250 }
     );
   }
 }
