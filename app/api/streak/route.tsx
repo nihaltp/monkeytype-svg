@@ -1,7 +1,4 @@
-import { ImageResponse } from '@vercel/og';
 import type { NextRequest } from 'next/server';
-
-export const runtime = 'edge';
 
 interface MonkeytypeProfile {
   data?: {
@@ -12,38 +9,82 @@ interface MonkeytypeProfile {
   };
 }
 
-// Helper to chunk array into groups of specified size
-const chunkArray = (arr: (number | null)[], size: number) =>
-  Array.from({ length: Math.ceil(arr.length / size) }, (_, i) =>
-    arr.slice(i * size, i * size + size)
+function generateErrorSVG(message: string): string {
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<svg width="900" height="200" xmlns="http://www.w3.org/2000/svg">
+  <rect width="900" height="200" fill="#323437"/>
+  <text x="450" y="100" fontFamily="monospace" fontSize="32" fill="#e2b714" textAnchor="middle" dominantBaseline="middle" fontWeight="bold">
+    ${message}
+  </text>
+</svg>`;
+}
+
+function generateStreakSVG(streak: number, testsByDays: (number | null)[]): string {
+  // Get the last 365 days
+  const last365 = testsByDays.slice(-365);
+
+  // Calculate max tests for opacity scaling
+  const maxTests = Math.max(
+    ...last365.filter((val): val is number => val !== null && val !== undefined),
+    1
   );
+
+  // Chunk into weeks (7-day groups)
+  const weeks: (number | null)[][] = [];
+  for (let i = 0; i < last365.length; i += 7) {
+    weeks.push(last365.slice(i, i + 7));
+  }
+
+  // Generate SVG rectangles for the heatmap
+  let squaresHTML = '';
+  let xPos = 180;
+  const squareSize = 12;
+  const gap = 3;
+
+  weeks.forEach((week, weekIndex) => {
+    week.forEach((dayCount, dayIndex) => {
+      const yPos = 40 + dayIndex * (squareSize + gap);
+      const isZero = dayCount === null || dayCount === 0;
+      const opacity = isZero
+        ? '0.3'
+        : Math.min(1, 0.4 + (dayCount! / maxTests) * 0.6).toFixed(2);
+      const color = isZero ? '#2c2e31' : '#e2b714';
+
+      squaresHTML += `    <rect x="${xPos}" y="${yPos}" width="${squareSize}" height="${squareSize}" fill="${color}" opacity="${opacity}" rx="2"/>\n`;
+    });
+
+    xPos += squareSize + gap;
+  });
+
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<svg width="900" height="200" xmlns="http://www.w3.org/2000/svg">
+  <rect width="900" height="200" fill="#323437"/>
+  
+  <!-- Streak Number -->
+  <text x="40" y="70" fontFamily="monospace" fontSize="56" fill="#e2b714" fontWeight="bold">
+    ${streak}
+  </text>
+  
+  <!-- Streak Label -->
+  <text x="40" y="110" fontFamily="monospace" fontSize="14" fill="#a0a0a0" fontWeight="500">
+    Current Streak
+  </text>
+  
+  <!-- Contribution Heatmap -->
+${squaresHTML}</svg>`;
+}
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const username = searchParams.get('username');
 
   if (!username) {
-    return new ImageResponse(
-      (
-        <div
-          style={{
-            width: '100%',
-            height: '100%',
-            background: '#323437',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontFamily: 'monospace',
-            fontSize: 32,
-            color: '#e2b714',
-            fontWeight: 'bold',
-          }}
-        >
-          Missing username parameter
-        </div>
-      ),
-      { width: 900, height: 200 }
-    );
+    return new Response(generateErrorSVG('Missing username parameter'), {
+      headers: {
+        'Content-Type': 'image/svg+xml',
+        'Cache-Control': 'public, max-age=3600, s-maxage=3600',
+      },
+    });
   }
 
   try {
@@ -52,165 +93,35 @@ export async function GET(request: NextRequest) {
     );
 
     if (!response.ok) {
-      return new ImageResponse(
-        (
-          <div
-            style={{
-              width: '100%',
-              height: '100%',
-              background: '#323437',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontFamily: 'monospace',
-              fontSize: 32,
-              color: '#e2b714',
-              fontWeight: 'bold',
-            }}
-          >
-            User not found
-          </div>
-        ),
-        { width: 900, height: 200 }
-      );
+      return new Response(generateErrorSVG('User not found'), {
+        status: 404,
+        headers: {
+          'Content-Type': 'image/svg+xml',
+          'Cache-Control': 'public, max-age=86400, s-maxage=86400',
+        },
+      });
     }
 
     const data: MonkeytypeProfile = await response.json();
     const streak = data?.data?.streak ?? 0;
     const testsByDays = data?.data?.testActivity?.testsByDays ?? [];
 
-    // Get the last 365 days (or 371 for full weeks)
-    const last365 = testsByDays.slice(-365);
+    const svg = generateStreakSVG(streak, testsByDays);
 
-    // Calculate max tests for opacity scaling
-    const maxTests = Math.max(
-      ...last365.filter((val): val is number => val !== null && val !== undefined),
-      1
-    );
-
-    // Chunk into weeks (7-day groups)
-    const weeks = chunkArray(last365, 7);
-
-    return new ImageResponse(
-      (
-        <div
-          style={{
-            width: '100%',
-            height: '100%',
-            background: '#323437',
-            display: 'flex',
-            alignItems: 'center',
-            padding: '20px',
-            gap: '30px',
-            fontFamily: 'monospace',
-            boxSizing: 'border-box',
-          }}
-        >
-          {/* Left Side - Streak Stats */}
-          <div
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'flex-start',
-              justifyContent: 'center',
-              gap: '8px',
-              minWidth: '150px',
-            }}
-          >
-            <div
-              style={{
-                fontSize: 56,
-                fontWeight: 'bold',
-                color: '#e2b714',
-                lineHeight: 1,
-              }}
-            >
-              {streak}
-            </div>
-            <div
-              style={{
-                fontSize: 14,
-                color: '#a0a0a0',
-                fontWeight: '500',
-              }}
-            >
-              Current Streak
-            </div>
-          </div>
-
-          {/* Right Side - Contribution Graph */}
-          <div
-            style={{
-              display: 'flex',
-              gap: '3px',
-              flexDirection: 'row',
-              flex: 1,
-            }}
-          >
-            {weeks.map((week, weekIndex) => (
-              <div
-                key={weekIndex}
-                style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '3px',
-                }}
-              >
-                {week.map((dayCount, dayIndex) => {
-                  const isZero = dayCount === null || dayCount === 0;
-                  const opacity = isZero
-                    ? 0.3
-                    : Math.min(1, 0.4 + (dayCount! / maxTests) * 0.6);
-                  const color = isZero ? '#2c2e31' : '#e2b714';
-
-                  return (
-                    <div
-                      key={dayIndex}
-                      style={{
-                        width: '12px',
-                        height: '12px',
-                        background: color,
-                        opacity: opacity,
-                        borderRadius: '2px',
-                      }}
-                    />
-                  );
-                })}
-              </div>
-            ))}
-          </div>
-        </div>
-      ),
-      {
-        width: 900,
-        height: 200,
-        headers: {
-          'Cache-Control': 'public, max-age=14400, s-maxage=14400',
-        },
-      }
-    );
+    return new Response(svg, {
+      headers: {
+        'Content-Type': 'image/svg+xml',
+        'Cache-Control': 'public, max-age=14400, s-maxage=14400',
+      },
+    });
   } catch (error) {
     console.error('Error generating streak image:', error);
-    return new ImageResponse(
-      (
-        <div
-          style={{
-            width: '100%',
-            height: '100%',
-            background: '#323437',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontFamily: 'monospace',
-            fontSize: 32,
-            color: '#e2b714',
-            fontWeight: 'bold',
-          }}
-        >
-          Error generating image
-        </div>
-      ),
-      { width: 900, height: 200 }
-    );
+    return new Response(generateErrorSVG('Error generating image'), {
+      status: 500,
+      headers: {
+        'Content-Type': 'image/svg+xml',
+        'Cache-Control': 'public, max-age=3600, s-maxage=3600',
+      },
+    });
   }
 }
