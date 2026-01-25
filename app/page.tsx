@@ -40,7 +40,7 @@ export default function MonkeytypeStreakGenerator() {
       ? window.location.origin
       : 'YOUR_DEPLOYMENT_URL';
 
-  const markdownLink = `![Streak](${deploymentUrl}/api/streak?username=${encodeURIComponent(username)})`;
+  const markdownLink = `![Monkeytype Streak](${deploymentUrl}/api/streak?username=${encodeURIComponent(username)})`;
 
   const handleCopyMarkdown = async () => {
     try {
