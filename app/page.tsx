@@ -151,11 +151,7 @@ export default function MonkeytypeStreakGenerator() {
                   <li>{'1. Enter your Monkeytype username above'}</li>
                   <li>{'2. Click Generate to create your streak widget'}</li>
                   <li>{'3. Copy the markdown code to your GitHub README'}</li>
-                  <li>
-                    {
-                      '4. The widget will automatically update every 4 hours with your latest stats'
-                    }
-                  </li>
+                  <li>{'4. The widget will automatically update every 4 hours with your latest stats'}</li>
                 </ol>
               </div>
             )}
@@ -164,7 +160,7 @@ export default function MonkeytypeStreakGenerator() {
 
         {/* Footer */}
         <p className="mt-8 text-center text-xs text-slate-500">
-          Made with ❤️ | Data from Monkeytype API | Deploy to Vercel for automatic revalidation
+          Made with ❤️ by <a href="https://github.com/nihaltp" className="underline">nihaltp</a> | Data from Monkeytype API
         </p>
       </div>
     </main>
