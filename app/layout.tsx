@@ -14,9 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'v0 App',
-  description: 'Created with v0',
-  generator: 'v0.app',
+  title: 'Monkeytype Streak',
+  description: 'Generate a dynamic GitHub README widget for your Monkeytype stats.',
   icons: {
     icon: [
       {
