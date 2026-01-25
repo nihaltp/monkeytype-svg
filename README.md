@@ -33,8 +33,8 @@ This project is built with [Next.js](https://nextjs.org/) (App Router) and TypeS
 
 1. Clone the repository:
    ```bash
-   git clone <repository-url>
-   cd <repository-directory>
+   git clone https://github.com/nihaltp/monkeytype-svg.git
+   cd monkeytype-svg
    ```
 
 2. Install dependencies:
