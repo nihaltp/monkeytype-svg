@@ -1,30 +1,55 @@
-# Monkeytype streak SVG
+# Monkeytype Streak SVG
 
-*Automatically synced with your [v0.app](https://v0.app) deployments*
+A dynamic SVG generator that visualizes your Monkeytype daily streak and activity over the last year. It generates a contribution graph similar to GitHub's, perfect for displaying on your GitHub profile or personal website.
 
-[![Deployed on Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?style=for-the-badge&logo=vercel)](https://vercel.com/nihaltpnki/v0-monkeytype-svg)
-[![Built with v0](https://img.shields.io/badge/Built%20with-v0.app-black?style=for-the-badge)](https://v0.app/chat/rGfvxmwrTcr)
+## Usage
 
-## Overview
+You can generate your streak image by using the following URL structure:
 
-This repository will stay in sync with your deployed chats on [v0.app](https://v0.app).
-Any changes you make to your deployed app will be automatically pushed to this repository from [v0.app](https://v0.app).
+```
+https://monkeytype-svg.vercel.app/api/streak?username=YOUR_USERNAME
+```
 
-## Deployment
+Replace `YOUR_USERNAME` with your actual Monkeytype username.
 
-Your project is live at:
+### Example
 
-**[https://vercel.com/nihaltpnki/v0-monkeytype-svg](https://vercel.com/nihaltpnki/v0-monkeytype-svg)**
+![Streak](https://monkeytype-svg.vercel.app/api/streak?username=nihaltp)
 
-## Build your app
+```markdown
+![Streak](https://monkeytype-svg.vercel.app/api/streak?username=nihaltp)
+```
 
-Continue building your app on:
+## Development
 
-**[https://v0.app/chat/rGfvxmwrTcr](https://v0.app/chat/rGfvxmwrTcr)**
+This project is built with [Next.js](https://nextjs.org/) (App Router) and TypeScript.
 
-## How It Works
+### Prerequisites
 
-1. Create and modify your project using [v0.app](https://v0.app)
-2. Deploy your chats from the v0 interface
-3. Changes are automatically pushed to this repository
-4. Vercel deploys the latest version from this repository
+- Node.js
+- pnpm
+
+### Getting Started
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/nihaltp/monkeytype-svg.git
+   cd monkeytype-svg
+   ```
+
+2. Install dependencies:
+   ```bash
+   pnpm install
+   ```
+
+3. Run the development server:
+   ```bash
+   pnpm dev
+   ```
+
+4. Open [http://localhost:3000](http://localhost:3000) with your browser.
+   To test the API endpoint locally, visit: `http://localhost:3000/api/streak?username=nihaltp`
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
