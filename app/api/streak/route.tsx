@@ -10,12 +10,13 @@ interface MonkeytypeProfile {
 }
 
 function generateErrorSVG(message: string): string {
-  return `<svg width="800" height="250" xmlns="http://www.w3.org/2000/svg">
-    <rect width="800" height="250" fill="#323437"/>
-    <text x="400" y="125" fontFamily="monospace" fontSize="32" fill="#e2b714" textAnchor="middle" dominantBaseline="middle" fontWeight="bold">
-      ${message}
-    </text>
-  </svg>`;
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<svg width="800" height="250" xmlns="http://www.w3.org/2000/svg">
+  <rect width="800" height="250" fill="#323437"/>
+  <text x="400" y="125" fontFamily="'Courier Prime', monospace" fontSize="32" fill="#e2b714" textAnchor="middle" dominantBaseline="middle" fontWeight="bold">
+    ${message}
+  </text>
+</svg>`;
 }
 
 function generateStreakSVG(streak: number, testsByDays: (number | null)[]): string {
@@ -40,34 +41,28 @@ function generateStreakSVG(streak: number, testsByDays: (number | null)[]): stri
     const y = 60 + row * (squareSize + gap);
 
     const isNull = tests === null || tests === undefined;
-    const opacity = isNull ? 1 : Math.max(0.3, tests / maxTests);
+    const opacity = isNull ? '1' : Math.max(0.3, tests / maxTests).toFixed(2);
     const color = isNull ? '#646669' : '#e2b714';
 
-    squaresHTML += `<rect x="${x}" y="${y}" width="${squareSize}" height="${squareSize}" fill="${color}" opacity="${opacity}" rx="4"/>`;
+    squaresHTML += `    <rect x="${x}" y="${y}" width="${squareSize}" height="${squareSize}" fill="${color}" opacity="${opacity}" rx="4"/>\n`;
   });
 
-  return `<svg width="800" height="250" xmlns="http://www.w3.org/2000/svg">
-    <defs>
-      <style>
-        @import url('https://fonts.googleapis.com/css2?family=Courier+Prime:wght@400;700&display=swap');
-      </style>
-    </defs>
-    
-    <rect width="800" height="250" fill="#323437"/>
-    
-    <!-- Streak Number -->
-    <text x="60" y="90" fontFamily="'Courier Prime', monospace" fontSize="72" fill="#e2b714" fontWeight="bold">
-      ${streak}
-    </text>
-    
-    <!-- Streak Label -->
-    <text x="60" y="155" fontFamily="'Courier Prime', monospace" fontSize="20" fill="#a0a0a0" fontWeight="500">
-      Current Streak
-    </text>
-    
-    <!-- Activity Heat Map -->
-    ${squaresHTML}
-  </svg>`;
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<svg width="800" height="250" xmlns="http://www.w3.org/2000/svg">
+  <rect width="800" height="250" fill="#323437"/>
+  
+  <!-- Streak Number -->
+  <text x="60" y="110" fontFamily="'Courier Prime', monospace" fontSize="72" fill="#e2b714" fontWeight="bold">
+    ${streak}
+  </text>
+  
+  <!-- Streak Label -->
+  <text x="60" y="170" fontFamily="'Courier Prime', monospace" fontSize="20" fill="#a0a0a0" fontWeight="500">
+    Current Streak
+  </text>
+  
+  <!-- Activity Heat Map -->
+${squaresHTML}</svg>`;
 }
 
 export async function GET(request: NextRequest) {
