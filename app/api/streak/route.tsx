@@ -1,9 +1,10 @@
-import { ImageResponse } from '@vercel/og';
+import { ImageResponse } from 'next/og';
 import type { NextRequest } from 'next/server';
+
+export const runtime = 'edge';
 
 interface MonkeytypeProfile {
   data?: {
-    streak?: number;
     testActivity?: {
       testsByDays?: (number | null)[];
     };
@@ -21,27 +22,24 @@ export async function GET(request: NextRequest) {
           style={{
             width: '100%',
             height: '100%',
-            background: '#323437',
+            backgroundColor: '#323437',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            fontFamily: 'monospace',
-            fontSize: 32,
+            fontSize: 24,
             color: '#e2b714',
-            fontWeight: 'bold',
           }}
         >
           Missing username parameter
         </div>
       ),
-      { width: 800, height: 250 }
+      { width: 800, height: 150 }
     );
   }
 
   try {
     const response = await fetch(
-      `https://api.monkeytype.com/users/${username}/profile?isUid=false`,
-      { cache: 'no-store' }
+      `https://api.monkeytype.com/users/${username}/profile?isUid=false`
     );
 
     if (!response.ok) {
@@ -51,35 +49,38 @@ export async function GET(request: NextRequest) {
             style={{
               width: '100%',
               height: '100%',
-              background: '#323437',
+              backgroundColor: '#323437',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              fontFamily: 'monospace',
-              fontSize: 32,
+              fontSize: 24,
               color: '#e2b714',
-              fontWeight: 'bold',
             }}
           >
             User not found
           </div>
         ),
-        { width: 800, height: 250 }
+        { width: 800, height: 150 }
       );
     }
 
     const data: MonkeytypeProfile = await response.json();
-    const streak = data?.data?.streak ?? 0;
     const testsByDays = data?.data?.testActivity?.testsByDays ?? [];
 
-    // Get the last 30 days of activity
-    const last30Days = testsByDays.slice(-30);
+    // Get the last 365 days
+    const last365 = testsByDays.slice(-365);
 
-    // Calculate max value for opacity scaling
+    // Calculate max tests for opacity scaling
     const maxTests = Math.max(
-      ...last30Days.filter((val): val is number => val !== null && val !== undefined),
+      ...last365.filter((val): val is number => val !== null && val !== undefined),
       1
     );
+
+    // Chunk into weeks (7-day groups)
+    const weeks: (number | null)[][] = [];
+    for (let i = 0; i < last365.length; i += 7) {
+      weeks.push(last365.slice(i, i + 7));
+    }
 
     return new ImageResponse(
       (
@@ -87,79 +88,62 @@ export async function GET(request: NextRequest) {
           style={{
             width: '100%',
             height: '100%',
-            background: '#323437',
+            backgroundColor: '#323437',
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'space-between',
-            padding: '40px 40px',
-            fontFamily: 'monospace',
+            justifyContent: 'center',
+            padding: '20px',
             boxSizing: 'border-box',
           }}
         >
-          {/* Left Side - Streak */}
           <div
             style={{
               display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'flex-start',
-              justifyContent: 'center',
-              gap: '16px',
+              gap: '3px',
+              flexDirection: 'row',
             }}
           >
-            <div
-              style={{
-                fontSize: 72,
-                fontWeight: 'bold',
-                color: '#e2b714',
-              }}
-            >
-              {streak}
-            </div>
-            <div
-              style={{
-                fontSize: 20,
-                color: '#a0a0a0',
-                fontWeight: '500',
-              }}
-            >
-              Current Streak
-            </div>
-          </div>
+            {weeks.map((week, weekIndex) => (
+              <div
+                key={weekIndex}
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '3px',
+                }}
+              >
+                {week.map((dayCount, dayIndex) => {
+                  const isZero = dayCount === null || dayCount === 0;
+                  const opacity = isZero
+                    ? 0.4
+                    : Math.min(1, 0.4 + (dayCount! / maxTests) * 0.6);
+                  const color = isZero ? '#2c2e31' : '#e2b714';
 
-          {/* Right Side - Activity Heat Map */}
-          <div
-            style={{
-              display: 'flex',
-              gap: '6px',
-              flexWrap: 'wrap',
-              width: '360px',
-              height: '160px',
-              alignContent: 'flex-start',
-              justifyContent: 'flex-end',
-            }}
-          >
-            {last30Days.map((tests, index) => {
-              const isNull = tests === null || tests === undefined;
-              const opacity = isNull ? 1 : Math.max(0.3, tests / maxTests);
-              const color = isNull ? '#646669' : '#e2b714';
-
-              return (
-                <div
-                  key={index}
-                  style={{
-                    width: '20px',
-                    height: '20px',
-                    background: color,
-                    opacity: opacity.toString(),
-                    borderRadius: '4px',
-                  }}
-                />
-              );
-            })}
+                  return (
+                    <div
+                      key={dayIndex}
+                      style={{
+                        width: '10px',
+                        height: '10px',
+                        backgroundColor: color,
+                        opacity: opacity,
+                        borderRadius: '2px',
+                      }}
+                    />
+                  );
+                })}
+              </div>
+            ))}
           </div>
         </div>
       ),
-      { width: 800, height: 250 }
+      {
+        width: 800,
+        height: 150,
+        headers: {
+          'Cache-Control': 'public, max-age=14400, s-maxage=14400',
+        },
+      }
     );
   } catch (error) {
     console.error('Error generating streak image:', error);
@@ -169,22 +153,18 @@ export async function GET(request: NextRequest) {
           style={{
             width: '100%',
             height: '100%',
-            background: '#323437',
+            backgroundColor: '#323437',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            fontFamily: 'monospace',
-            fontSize: 32,
+            fontSize: 24,
             color: '#e2b714',
-            fontWeight: 'bold',
           }}
         >
           Error generating image
         </div>
       ),
-      { width: 800, height: 250 }
+      { width: 800, height: 150 }
     );
   }
 }
-
-export const revalidate = 14400; // 4 hours
