@@ -109,6 +109,8 @@ export default function MonkeytypeStreakGenerator() {
                   <img
                     src={imageUrl || "/placeholder.svg"}
                     alt={`${username}'s Monkeytype Streak`}
+                    width={800}
+                    height={250}
                     className="max-w-full"
                   />
                 </div>
