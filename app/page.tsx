@@ -1,15 +1,13 @@
 'use client';
 
-import React from "react"
-
-import { useState } from 'react';
-import { Copy, Check } from 'lucide-react';
+import React, { useState } from 'react';
+import { Copy, Check, Zap, Github, Rocket } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
 import { toast } from 'sonner';
 
-export default function MonkeytypeStreakGenerator() {
+export default function LandingPage() {
   const [username, setUsername] = useState('');
   const [imageUrl, setImageUrl] = useState('');
   const [loading, setLoading] = useState(false);
@@ -61,108 +59,166 @@ export default function MonkeytypeStreakGenerator() {
   };
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-900 p-8">
-      <div className="mx-auto max-w-2xl">
-        {/* Header */}
-        <div className="mb-12 text-center">
-          <h1 className="mb-2 text-4xl font-bold text-amber-400">
-            Monkeytype Streak Generator
-          </h1>
-          <p className="text-lg text-slate-400">
-            Create a dynamic GitHub README widget for your Monkeytype stats
-          </p>
-        </div>
+    <main className="min-h-screen bg-background text-foreground">
+      {/* Hero Section */}
+      <section className="container mx-auto px-4 py-16 md:py-24">
+        <div className="mx-auto max-w-4xl">
+          <div className="mb-12 text-center">
+            <h1 className="mb-4 text-4xl font-bold tracking-tight text-primary md:text-6xl">
+              Monkeytype Streak
+            </h1>
+            <p className="text-xl text-muted-foreground">
+              Show off your typing discipline on GitHub with a dynamic streak widget.
+            </p>
+          </div>
 
-        {/* Main Card */}
-        <Card className="border border-slate-700 bg-slate-900 shadow-2xl">
-          <div className="p-8">
-            {/* Input Section */}
-            <div className="mb-8 space-y-4">
-              <label htmlFor="username" className="block text-sm font-medium text-slate-200">
-                Monkeytype Username
-              </label>
-              <div className="flex gap-3">
-                <Input
-                  id="username"
-                  type="text"
-                  placeholder="Enter your Monkeytype username..."
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  onKeyPress={handleKeyPress}
-                  className="border border-slate-600 bg-slate-800 text-white placeholder-slate-500 focus:border-amber-400"
-                />
-                <Button
-                  onClick={handleGenerate}
-                  disabled={loading || !username.trim()}
-                  className="bg-amber-500 hover:bg-amber-600 disabled:bg-slate-700 disabled:text-slate-500"
-                >
-                  {loading ? 'Generating...' : 'Generate'}
-                </Button>
+          <div className="mx-auto max-w-2xl">
+            <Card className="border-border bg-card shadow-2xl">
+              <div className="p-8">
+                <div className="mb-8 space-y-4">
+                  <label htmlFor="username" className="block text-sm font-medium text-foreground">
+                    Monkeytype Username
+                  </label>
+                  <div className="flex gap-3">
+                    <Input
+                      id="username"
+                      type="text"
+                      placeholder="Enter your Monkeytype username..."
+                      value={username}
+                      onChange={(e) => setUsername(e.target.value)}
+                      onKeyPress={handleKeyPress}
+                      className="border-input bg-background text-foreground"
+                    />
+                    <Button
+                      onClick={handleGenerate}
+                      disabled={loading || !username.trim()}
+                      className="bg-primary text-primary-foreground hover:bg-primary/90"
+                    >
+                      {loading ? 'Generating...' : 'Generate'}
+                    </Button>
+                  </div>
+                </div>
+
+                {imageUrl && (
+                  <div className="mb-8 space-y-4">
+                    <h2 className="text-lg font-semibold text-foreground">Preview</h2>
+                    <div className="flex justify-center rounded-lg border border-border bg-muted/50 p-4">
+                      <img
+                        src={imageUrl || "/placeholder.svg"}
+                        alt={`${username}'s Monkeytype Streak`}
+                        width={800}
+                        height={250}
+                        className="max-w-full"
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {imageUrl && username && (
+                  <div className="space-y-4">
+                    <h2 className="text-lg font-semibold text-foreground">GitHub README Markdown</h2>
+                    <div className="relative">
+                      <pre className="overflow-x-auto rounded-lg border border-border bg-muted p-4 text-sm text-foreground">
+                        <code>{markdownLink}</code>
+                      </pre>
+                      <button
+                        onClick={handleCopyMarkdown}
+                        className="absolute right-4 top-4 rounded-lg bg-background p-2 hover:bg-muted"
+                        title="Copy to clipboard"
+                      >
+                        {copied ? (
+                          <Check className="h-5 w-5 text-green-500" />
+                        ) : (
+                          <Copy className="h-5 w-5 text-muted-foreground" />
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </Card>
+          </div>
+        </div>
+      </section>
+
+      {/* Feature Grid */}
+      <section className="border-y border-border bg-muted/30 py-16 md:py-24">
+        <div className="container mx-auto px-4">
+          <div className="grid gap-8 md:grid-cols-3">
+            <div className="flex flex-col items-center text-center">
+              <div className="mb-4 rounded-full bg-primary/10 p-4">
+                <Zap className="h-8 w-8 text-primary" />
+              </div>
+              <h3 className="mb-2 text-xl font-bold text-foreground">Live Updates</h3>
+              <p className="text-muted-foreground">
+                Always current stats fetched directly via the Monkeytype API.
+              </p>
+            </div>
+            <div className="flex flex-col items-center text-center">
+              <div className="mb-4 rounded-full bg-primary/10 p-4">
+                <Github className="h-8 w-8 text-primary" />
+              </div>
+              <h3 className="mb-2 text-xl font-bold text-foreground">GitHub Ready</h3>
+              <p className="text-muted-foreground">
+                Copy-paste markdown support for your README.md profile.
+              </p>
+            </div>
+            <div className="flex flex-col items-center text-center">
+              <div className="mb-4 rounded-full bg-primary/10 p-4">
+                <Rocket className="h-8 w-8 text-primary" />
+              </div>
+              <h3 className="mb-2 text-xl font-bold text-foreground">Performance</h3>
+              <p className="text-muted-foreground">
+                Cached responses for lightning-fast loading times.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Visual Preview */}
+      <section className="py-16 md:py-24">
+        <div className="container mx-auto px-4">
+          <div className="mb-12 text-center">
+            <h2 className="text-3xl font-bold text-foreground">Looks Great on Your Profile</h2>
+            <p className="mt-4 text-muted-foreground">
+              Seamlessly integrates with your existing GitHub statistics.
+            </p>
+          </div>
+          <div className="mx-auto max-w-4xl overflow-hidden rounded-xl border border-border bg-card shadow-lg">
+            <div className="border-b border-border bg-muted/50 p-4 flex items-center gap-2">
+               <div className="h-3 w-3 rounded-full bg-red-500/20 border border-red-500/50"></div>
+               <div className="h-3 w-3 rounded-full bg-yellow-500/20 border border-yellow-500/50"></div>
+               <div className="h-3 w-3 rounded-full bg-green-500/20 border border-green-500/50"></div>
+               <span className="ml-2 text-xs text-muted-foreground">nihaltp/README.md</span>
+            </div>
+            <div className="p-8 md:p-12 space-y-8">
+              <div className="space-y-4">
+                <div className="h-8 w-48 rounded bg-muted"></div>
+                <div className="space-y-2">
+                  <div className="h-4 w-full max-w-2xl rounded bg-muted/50"></div>
+                  <div className="h-4 w-full max-w-xl rounded bg-muted/50"></div>
+                </div>
+              </div>
+              <div className="rounded-lg border border-border bg-muted/20 p-6 flex justify-center items-center h-[250px] relative overflow-hidden">
+                 <div className="absolute inset-0 flex items-center justify-center text-muted-foreground/20 text-4xl font-bold select-none">
+                    YOUR STATS HERE
+                 </div>
+                 <div className="z-10 text-center">
+                    <p className="text-sm text-muted-foreground">Monkeytype Streak Widget</p>
+                 </div>
               </div>
             </div>
-
-            {/* Preview Section */}
-            {imageUrl && (
-              <div className="mb-8 space-y-4">
-                <h2 className="text-lg font-semibold text-slate-200">Preview</h2>
-                <div className="flex justify-center rounded-lg border border-slate-700 bg-slate-800 p-4">
-                  <img
-                    src={imageUrl || "/placeholder.svg"}
-                    alt={`${username}'s Monkeytype Streak`}
-                    width={800}
-                    height={250}
-                    className="max-w-full"
-                  />
-                </div>
-              </div>
-            )}
-
-            {/* Markdown Code Block */}
-            {imageUrl && username && (
-              <div className="space-y-4">
-                <h2 className="text-lg font-semibold text-slate-200">GitHub README Markdown</h2>
-                <div className="relative">
-                  <pre className="overflow-x-auto rounded-lg border border-slate-700 bg-slate-800 p-4 text-sm text-slate-200">
-                    <code>{markdownLink}</code>
-                  </pre>
-                  <button
-                    onClick={handleCopyMarkdown}
-                    className="absolute right-4 top-4 rounded-lg bg-slate-700 p-2 hover:bg-slate-600"
-                    title="Copy to clipboard"
-                  >
-                    {copied ? (
-                      <Check className="h-5 w-5 text-green-400" />
-                    ) : (
-                      <Copy className="h-5 w-5 text-slate-300" />
-                    )}
-                  </button>
-                </div>
-                <p className="text-xs text-slate-400">
-                  Paste this into your GitHub README.md to display your Monkeytype streak!
-                </p>
-              </div>
-            )}
-
-            {/* Instructions */}
-            {!imageUrl && (
-              <div className="rounded-lg border border-slate-700 bg-slate-800/50 p-6">
-                <h3 className="mb-4 font-semibold text-slate-200">How to use:</h3>
-                <ol className="space-y-2 text-sm text-slate-400">
-                  <li>{'1. Enter your Monkeytype username above'}</li>
-                  <li>{'2. Click Generate to create your streak widget'}</li>
-                  <li>{'3. Copy the markdown code to your GitHub README'}</li>
-                  <li>{'4. The widget will automatically update every 4 hours with your latest stats'}</li>
-                </ol>
-              </div>
-            )}
           </div>
-        </Card>
+        </div>
+      </section>
 
-        {/* Footer */}
-        <p className="mt-8 text-center text-xs text-slate-500">
-          Made with ❤️ by <a href="https://github.com/nihaltp" className="underline">nihaltp</a> | Data from Monkeytype API
+      {/* Footer */}
+      <footer className="border-t border-border py-8 text-center text-sm text-muted-foreground">
+        <p>
+          Made with ❤️ by <a href="https://github.com/nihaltp" className="underline hover:text-foreground">nihaltp</a> | Data from Monkeytype API
         </p>
-      </div>
+      </footer>
     </main>
   );
 }
