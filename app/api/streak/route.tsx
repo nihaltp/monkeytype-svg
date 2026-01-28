@@ -3,6 +3,14 @@ import type { NextRequest } from 'next/server';
 
 export const runtime = 'edge';
 
+// Strict cache headers to prevent GitHub Camo and other proxies from serving stale images.
+// We use 'no-store' to ensure the user always sees the most up-to-date stats.
+const CACHE_HEADERS = {
+  'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0',
+  Pragma: 'no-cache',
+  Expires: '0',
+};
+
 interface MonkeytypeProfile {
   data?: {
     testActivity?: {
@@ -33,7 +41,7 @@ export async function GET(request: NextRequest) {
           Missing username parameter
         </div>
       ),
-      { width: 800, height: 250 }
+      { width: 800, height: 250, headers: CACHE_HEADERS }
     );
   }
 
@@ -61,7 +69,7 @@ export async function GET(request: NextRequest) {
             User not found
           </div>
         ),
-        { width: 800, height: 250 }
+        { width: 800, height: 250, headers: CACHE_HEADERS }
       );
     }
 
@@ -141,11 +149,7 @@ export async function GET(request: NextRequest) {
       {
         width: 800,
         height: 250,
-        headers: {
-          'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0',
-          Pragma: 'no-cache',
-          Expires: '0',
-        },
+        headers: CACHE_HEADERS,
       }
     );
   } catch (error) {
@@ -167,7 +171,7 @@ export async function GET(request: NextRequest) {
           Error generating image
         </div>
       ),
-      { width: 800, height: 250 }
+      { width: 800, height: 250, headers: CACHE_HEADERS }
     );
   }
 }
