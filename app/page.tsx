@@ -21,7 +21,12 @@ export default function LandingPage() {
 
     setLoading(true);
     try {
-      const url = `/api/streak?username=${encodeURIComponent(username)}`;
+      // Add a timestamp to the URL to force the browser to fetch a fresh image
+      const params = new URLSearchParams({
+        username,
+        t: Date.now().toString(),
+      });
+      const url = `/api/streak?${params.toString()}`;
       setImageUrl(url);
       toast.success('Image generated successfully!');
     } catch (error) {
