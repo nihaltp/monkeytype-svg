@@ -1,6 +1,6 @@
 {
   "name": "monkeytype-svg",
-  "version": "0.1.11",
+  "version": "0.1.9",
   "private": true,
   "scripts": {
     "build": "next build",

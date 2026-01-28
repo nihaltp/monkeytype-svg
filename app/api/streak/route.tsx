@@ -76,19 +76,51 @@ export async function GET(request: NextRequest) {
     const data: MonkeytypeProfile = await response.json();
     const testsByDays = data?.data?.testActivity?.testsByDays ?? [];
 
-    // Get the last 365 days
-    const last365 = testsByDays.slice(-365);
+    // Calculate alignment
+    const today = new Date();
+    const dayOfWeek = today.getDay(); // 0 = Sunday, 6 = Saturday
 
-    // Calculate max tests for opacity scaling
-    const maxTests = Math.max(
-      ...last365.filter((val): val is number => val !== null && val !== undefined),
-      1
-    );
+    // We want to show 53 weeks to ensure full coverage
+    const totalWeeks = 53;
+    const totalDays = totalWeeks * 7;
+
+    // Create a grid initialized with nulls
+    const gridData: (number | null)[] = new Array(totalDays).fill(null);
+
+    // Calculate where the last data point (Today) should go in our grid.
+    // The grid is a flat array representing 53 columns of 7 rows.
+    // Column 52 (index 52) is the last column.
+    // The cell for today is at index: (52 * 7) + dayOfWeek
+    const gridEndIndex = (totalWeeks - 1) * 7 + dayOfWeek;
+
+    // We populate the grid backwards from today
+    // We take data from testsByDays backwards
+    const availableDataPoints = testsByDays.length;
+
+    // Iterate backwards through the grid starting from today's position
+    for (let i = 0; i <= gridEndIndex; i++) {
+      // The index in testsByDays corresponding to this grid position
+      // gridEndIndex corresponds to availableDataPoints - 1 (the last item)
+      // gridEndIndex - i corresponds to availableDataPoints - 1 - i
+
+      const dataIndex = availableDataPoints - 1 - i;
+
+      if (dataIndex >= 0) {
+        gridData[gridEndIndex - i] = testsByDays[dataIndex];
+      } else {
+        // No more data available
+        break;
+      }
+    }
+
+    // Determine max tests for opacity scaling based on the visible data
+    const visibleValues = gridData.filter((val): val is number => val !== null && val !== undefined);
+    const maxTests = visibleValues.length > 0 ? Math.max(...visibleValues, 1) : 1;
 
     // Chunk into weeks (7-day groups)
     const weeks: (number | null)[][] = [];
-    for (let i = 0; i < last365.length; i += 7) {
-      weeks.push(last365.slice(i, i + 7));
+    for (let i = 0; i < totalDays; i += 7) {
+      weeks.push(gridData.slice(i, i + 7));
     }
 
     return new ImageResponse(
