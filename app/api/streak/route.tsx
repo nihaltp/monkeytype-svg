@@ -84,8 +84,8 @@ export async function GET(request: NextRequest) {
     const totalWeeks = 53;
     const totalDays = totalWeeks * 7;
 
-    // Create a grid initialized with nulls
-    const gridData: (number | null)[] = new Array(totalDays).fill(null);
+    // Create a grid initialized with -1 (representing "future" days)
+    const gridData: (number | null)[] = new Array(totalDays).fill(-1);
 
     // Calculate where the last data point (Today) should go in our grid.
     // The grid is a flat array representing 53 columns of 7 rows.
@@ -108,13 +108,17 @@ export async function GET(request: NextRequest) {
       if (dataIndex >= 0) {
         gridData[gridEndIndex - i] = testsByDays[dataIndex];
       } else {
-        // No more data available
-        break;
+        // No more data available, fill remaining past slots with 0 (null) if needed,
+        // but testsByDays usually has history. If we run out, it's effectively 0.
+        // However, we initialized with -1, so we should explicitly set past days to 0 (null) if we run out of data
+        gridData[gridEndIndex - i] = null;
       }
     }
 
-    // Determine max tests for opacity scaling based on the visible data
-    const visibleValues = gridData.filter((val): val is number => val !== null && val !== undefined);
+    // For indices *after* gridEndIndex, they remain -1 (future).
+
+    // Determine max tests for opacity scaling based on the visible data (excluding -1)
+    const visibleValues = gridData.filter((val): val is number => val !== null && val !== undefined && val !== -1);
     const maxTests = visibleValues.length > 0 ? Math.max(...visibleValues, 1) : 1;
 
     // Chunk into weeks (7-day groups)
@@ -154,7 +158,24 @@ export async function GET(request: NextRequest) {
                 }}
               >
                 {week.map((dayCount, dayIndex) => {
+                  const isFuture = dayCount === -1;
                   const isZero = dayCount === null || dayCount === 0;
+
+                  // Future days are transparent
+                  if (isFuture) {
+                     return (
+                      <div
+                        key={dayIndex}
+                        style={{
+                          width: '10px',
+                          height: '10px',
+                          backgroundColor: 'transparent',
+                          borderRadius: '2px',
+                        }}
+                      />
+                    );
+                  }
+
                   const opacity = isZero
                     ? 0.4
                     : Math.min(1, 0.4 + (dayCount! / maxTests) * 0.6);
