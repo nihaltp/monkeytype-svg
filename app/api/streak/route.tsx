@@ -48,7 +48,7 @@ export async function GET(request: NextRequest) {
   try {
     const response = await fetch(
       `https://api.monkeytype.com/users/${username}/profile?isUid=false`,
-      { cache: 'no-store' }
+      { next: { revalidate: 60 } }
     );
 
     if (!response.ok) {
