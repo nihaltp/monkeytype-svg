@@ -22,6 +22,62 @@ interface MonkeytypeProfile {
   };
 }
 
+const ERROR_STYLE = {
+  width: '100%',
+  height: '100%',
+  backgroundColor: '#323437',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  fontSize: 24,
+  color: '#e2b714',
+} as const;
+
+const CONTAINER_STYLE = {
+  width: '100%',
+  height: '100%',
+  backgroundColor: '#323437',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  padding: '20px',
+  boxSizing: 'border-box' as const,
+} as const;
+
+const GRID_STYLE = {
+  display: 'flex',
+  gap: '3px',
+  flexDirection: 'row' as const,
+} as const;
+
+const WEEK_STYLE = {
+  display: 'flex',
+  flexDirection: 'column' as const,
+  gap: '3px',
+} as const;
+
+const BASE_DAY_STYLE = {
+  width: '10px',
+  height: '10px',
+  borderRadius: '2px',
+} as const;
+
+const FUTURE_DAY_STYLE = {
+  ...BASE_DAY_STYLE,
+  backgroundColor: 'transparent',
+} as const;
+
+const ZERO_DAY_STYLE = {
+  ...BASE_DAY_STYLE,
+  backgroundColor: '#2c2e31',
+  opacity: 0.4,
+} as const;
+
+const ACTIVE_DAY_BASE_STYLE = {
+  ...BASE_DAY_STYLE,
+  backgroundColor: '#e2b714',
+} as const;
+
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const username = searchParams.get('username')?.trim();
@@ -57,18 +113,7 @@ export async function GET(request: NextRequest) {
     if (!response.ok) {
       return new ImageResponse(
         (
-          <div
-            style={{
-              width: '100%',
-              height: '100%',
-              backgroundColor: '#323437',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: 24,
-              color: '#e2b714',
-            }}
-          >
+          <div style={ERROR_STYLE}>
             User not found
           </div>
         ),
@@ -132,67 +177,35 @@ export async function GET(request: NextRequest) {
 
     return new ImageResponse(
       (
-        <div
-          style={{
-            width: '100%',
-            height: '100%',
-            backgroundColor: '#323437',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: '20px',
-            boxSizing: 'border-box',
-          }}
-        >
-          <div
-            style={{
-              display: 'flex',
-              gap: '3px',
-              flexDirection: 'row',
-            }}
-          >
+        <div style={CONTAINER_STYLE}>
+          <div style={GRID_STYLE}>
             {weeks.map((week, weekIndex) => (
-              <div
-                key={weekIndex}
-                style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '3px',
-                }}
-              >
+              <div key={weekIndex} style={WEEK_STYLE}>
                 {week.map((dayCount, dayIndex) => {
                   const isFuture = dayCount === -1;
                   const isZero = dayCount === null || dayCount === 0;
 
                   // Future days are transparent
                   if (isFuture) {
-                     return (
-                      <div
-                        key={dayIndex}
-                        style={{
-                          width: '10px',
-                          height: '10px',
-                          backgroundColor: 'transparent',
-                          borderRadius: '2px',
-                        }}
-                      />
+                    return (
+                      <div key={dayIndex} style={FUTURE_DAY_STYLE} />
                     );
                   }
 
-                  const opacity = isZero
-                    ? 0.4
-                    : Math.min(1, 0.4 + (dayCount! / maxTests) * 0.6);
-                  const color = isZero ? '#2c2e31' : '#e2b714';
+                  if (isZero) {
+                    return (
+                      <div key={dayIndex} style={ZERO_DAY_STYLE} />
+                    );
+                  }
+
+                  const opacity = Math.min(1, 0.4 + (dayCount! / maxTests) * 0.6);
 
                   return (
                     <div
                       key={dayIndex}
                       style={{
-                        width: '10px',
-                        height: '10px',
-                        backgroundColor: color,
+                        ...ACTIVE_DAY_BASE_STYLE,
                         opacity: opacity,
-                        borderRadius: '2px',
                       }}
                     />
                   );
@@ -212,18 +225,7 @@ export async function GET(request: NextRequest) {
     console.error('Error generating streak image:', error);
     return new ImageResponse(
       (
-        <div
-          style={{
-            width: '100%',
-            height: '100%',
-            backgroundColor: '#323437',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: 24,
-            color: '#e2b714',
-          }}
-        >
+        <div style={ERROR_STYLE}>
           Error generating image
         </div>
       ),
