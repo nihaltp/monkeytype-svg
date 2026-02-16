@@ -3,8 +3,11 @@ import type { NextRequest } from 'next/server';
 
 export const runtime = 'edge';
 
+const REVALIDATE_SECONDS = parseInt(process.env.MONKEYTYPE_REVALIDATE_SECONDS || '60', 10);
+
 // Strict cache headers to prevent GitHub Camo and other proxies from serving stale images.
-// We use 'no-store' to ensure the user always sees the most up-to-date stats.
+// We use 'no-store' to ensure the user always sees the most up-to-date server response,
+// although the upstream Monkeytype data may be cached for REVALIDATE_SECONDS.
 const CACHE_HEADERS = {
   'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0',
   Pragma: 'no-cache',
@@ -77,13 +80,24 @@ const ACTIVE_DAY_BASE_STYLE = {
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
-  const username = searchParams.get('username');
+  const username = searchParams.get('username')?.trim();
 
-  if (!username) {
+  if (!username || username.length > 64) {
     return new ImageResponse(
       (
-        <div style={ERROR_STYLE}>
-          Missing username parameter
+        <div
+          style={{
+            width: '100%',
+            height: '100%',
+            backgroundColor: '#323437',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: 24,
+            color: '#e2b714',
+          }}
+        >
+          Invalid username
         </div>
       ),
       { width: 800, height: 250, headers: CACHE_HEADERS }
@@ -92,8 +106,8 @@ export async function GET(request: NextRequest) {
 
   try {
     const response = await fetch(
-      `https://api.monkeytype.com/users/${username}/profile?isUid=false`,
-      { cache: 'no-store' }
+      `https://api.monkeytype.com/users/${encodeURIComponent(username)}/profile?isUid=false`,
+      { next: { revalidate: REVALIDATE_SECONDS } }
     );
 
     if (!response.ok) {

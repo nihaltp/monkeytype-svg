@@ -1,0 +1,36 @@
+pull_request_rules:
+  - name: Label conflicting pull requests
+    description: Add a label to a pull request with conflict to spot it easily
+    conditions:
+      - conflict
+      - -closed
+    actions:
+      label:
+        toggle:
+          - conflict
+
+  - name: auto-merge PRs created by nihaltp on snyk-upgrade-* branches
+    conditions:
+      - author=nihaltp
+      - head~=^snyk-(upgrade|fix)-.*$
+      - "#check-failure=0"
+      - "#check-pending=0"
+      - -conflict
+      - "#approved-reviews-by>=0"
+    actions:
+      merge:
+        method: squash
+      delete_head_branch: {}
+
+  - name: auto-merge PRs by vercel bot
+    conditions:
+      - author=vercel[bot]
+      - head~=^vercel/.*
+      - "#check-failure=0"
+      - "#check-pending=0"
+      - -conflict
+      - "#approved-reviews-by>=0"
+    actions:
+      merge:
+        method: squash
+      delete_head_branch: {}
