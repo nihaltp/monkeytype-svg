@@ -42,6 +42,7 @@ export const metadata: Metadata = {
   verification: {
     google: 'google-site-verification-code', // Placeholder, user should replace or configure via env
   },
+  manifest: '/site.webmanifest',
   icons: {
     icon: [
       {
