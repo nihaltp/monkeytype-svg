@@ -221,7 +221,7 @@ export default function LandingPage() {
       {/* Footer */}
       <footer className="border-t border-border py-8 text-center text-sm text-muted-foreground">
         <p>
-          Made with ❤️ by <a href="https://github.com/nihaltp" className="underline hover:text-foreground">nihaltp</a> | Data from Monkeytype API
+          Made with ❤️ by <a href="https://github.com/nihaltp" target="_blank" rel="noopener noreferrer" className="underline hover:text-foreground">nihaltp</a> (<a href="https://nihaltp.vercel.app" target="_blank" rel="noopener noreferrer" className="underline hover:text-foreground">website</a>) | Data from Monkeytype API
         </p>
       </footer>
     </main>

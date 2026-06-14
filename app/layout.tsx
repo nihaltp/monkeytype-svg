@@ -20,7 +20,10 @@ export const metadata: Metadata = {
   description: 'Generate a dynamic GitHub README widget for your Monkeytype stats.',
   metadataBase: new URL(process.env.NEXT_PUBLIC_VERCEL_URL ? `https://${process.env.NEXT_PUBLIC_VERCEL_URL}` : 'http://localhost:3000'),
   keywords: ['monkeytype', 'typing test', 'streak', 'github readme', 'widget', 'svg', 'typing stats'],
-  authors: [{ name: 'nihaltp', url: 'https://github.com/nihaltp' }],
+  authors: [
+    { name: 'nihaltp', url: 'https://github.com/nihaltp' },
+    { name: 'nihaltp portfolio', url: 'https://nihaltp.vercel.app' }
+  ],
   creator: 'nihaltp',
   openGraph: {
     title: 'Monkeytype Streak',
@@ -78,6 +81,9 @@ export default function RootLayout({
       '@type': 'Person',
       name: 'nihaltp',
       url: 'https://github.com/nihaltp',
+      sameAs: [
+        'https://nihaltp.vercel.app'
+      ]
     },
   }
 
