@@ -32,3 +32,14 @@ pull_request_rules:
     actions:
       merge:
         method: squash
+
+  - name: auto-merge PRs created by dependabot
+    conditions:
+      - author=dependabot[bot]
+      - "#check-failure=0"
+      - "#check-pending=0"
+      - -conflict
+      - "#approved-reviews-by>=0"
+    actions:
+      merge:
+        method: squash
