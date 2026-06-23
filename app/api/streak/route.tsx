@@ -149,6 +149,8 @@ export async function GET(request: NextRequest) {
     // We take data from testsByDays backwards
     const availableDataPoints = testsByDays.length;
 
+    let maxTests = 1;
+
     // Iterate backwards through the grid starting from today's position
     for (let i = 0; i <= gridEndIndex; i++) {
       // The index in testsByDays corresponding to this grid position
@@ -158,7 +160,11 @@ export async function GET(request: NextRequest) {
       const dataIndex = availableDataPoints - 1 - i;
 
       if (dataIndex >= 0) {
-        gridData[gridEndIndex - i] = testsByDays[dataIndex];
+        const val = testsByDays[dataIndex];
+        gridData[gridEndIndex - i] = val;
+        if (val !== null && val !== undefined && val > maxTests) {
+          maxTests = val;
+        }
       } else {
         // No more data available, fill remaining past slots with 0 (null) if needed,
         // but testsByDays usually has history. If we run out, it's effectively 0.
@@ -168,11 +174,6 @@ export async function GET(request: NextRequest) {
     }
 
     // For indices *after* gridEndIndex, they remain -1 (future).
-
-    // Determine max tests for opacity scaling based on the visible data (excluding -1)
-    const visibleValues = gridData.filter((val): val is number => val !== null && val !== undefined && val !== -1);
-    const maxTests = visibleValues.length > 0 ? Math.max(...visibleValues, 1) : 1;
-
     // Chunk into weeks (7-day groups)
     const weeks: (number | null)[][] = [];
     for (let i = 0; i < totalDays; i += 7) {
