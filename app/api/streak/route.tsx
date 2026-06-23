@@ -12,6 +12,12 @@ const CACHE_HEADERS = {
   'Cache-Control': `public, max-age=0, s-maxage=${REVALIDATE_SECONDS}, stale-while-revalidate=${REVALIDATE_SECONDS}`,
 };
 
+const ERROR_CACHE_HEADERS = {
+  'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0',
+  Pragma: 'no-cache',
+  Expires: '0',
+};
+
 interface MonkeytypeProfile {
   data?: {
     testActivity?: {
@@ -98,7 +104,7 @@ export async function GET(request: NextRequest) {
           Invalid username
         </div>
       ),
-      { width: 800, height: 250, headers: CACHE_HEADERS }
+      { width: 800, height: 250, headers: ERROR_CACHE_HEADERS }
     );
   }
 
@@ -115,7 +121,7 @@ export async function GET(request: NextRequest) {
             User not found
           </div>
         ),
-        { width: 800, height: 250, headers: CACHE_HEADERS }
+        { width: 800, height: 250, headers: ERROR_CACHE_HEADERS }
       );
     }
 
@@ -227,7 +233,7 @@ export async function GET(request: NextRequest) {
           Error generating image
         </div>
       ),
-      { width: 800, height: 250, headers: CACHE_HEADERS }
+      { width: 800, height: 250, headers: ERROR_CACHE_HEADERS }
     );
   }
 }
