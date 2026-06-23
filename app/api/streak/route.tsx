@@ -3,12 +3,13 @@ import type { NextRequest } from 'next/server';
 
 export const runtime = 'edge';
 
-const REVALIDATE_SECONDS = parseInt(process.env.MONKEYTYPE_REVALIDATE_SECONDS || '60', 10);
+const rawRevalidate = parseInt(process.env.MONKEYTYPE_REVALIDATE_SECONDS || '60', 10);
+const REVALIDATE_SECONDS = isNaN(rawRevalidate) || rawRevalidate < 1 ? 60 : rawRevalidate;
 
 // Cache headers to allow shared caches (Vercel Edge Network, GitHub Camo) to cache the rendered image
 // for the same duration as the upstream Monkeytype data revalidation period.
 const CACHE_HEADERS = {
-  'Cache-Control': `public, s-maxage=${REVALIDATE_SECONDS}, stale-while-revalidate`,
+  'Cache-Control': `public, max-age=0, s-maxage=${REVALIDATE_SECONDS}, stale-while-revalidate=${REVALIDATE_SECONDS}`,
 };
 
 interface MonkeytypeProfile {
