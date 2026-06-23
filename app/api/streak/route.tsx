@@ -3,12 +3,16 @@ import type { NextRequest } from 'next/server';
 
 export const runtime = 'edge';
 
-const REVALIDATE_SECONDS = parseInt(process.env.MONKEYTYPE_REVALIDATE_SECONDS || '60', 10);
+const rawRevalidate = parseInt(process.env.MONKEYTYPE_REVALIDATE_SECONDS || '60', 10);
+const REVALIDATE_SECONDS = isNaN(rawRevalidate) || rawRevalidate < 1 ? 60 : rawRevalidate;
 
-// Strict cache headers to prevent GitHub Camo and other proxies from serving stale images.
-// We use 'no-store' to ensure the user always sees the most up-to-date server response,
-// although the upstream Monkeytype data may be cached for REVALIDATE_SECONDS.
+// Cache headers to allow shared caches (Vercel Edge Network, GitHub Camo) to cache the rendered image
+// for the same duration as the upstream Monkeytype data revalidation period.
 const CACHE_HEADERS = {
+  'Cache-Control': `public, max-age=0, s-maxage=${REVALIDATE_SECONDS}, stale-while-revalidate=${REVALIDATE_SECONDS}`,
+};
+
+const ERROR_CACHE_HEADERS = {
   'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0',
   Pragma: 'no-cache',
   Expires: '0',
@@ -100,7 +104,7 @@ export async function GET(request: NextRequest) {
           Invalid username
         </div>
       ),
-      { width: 800, height: 250, headers: CACHE_HEADERS }
+      { width: 800, height: 250, headers: ERROR_CACHE_HEADERS }
     );
   }
 
@@ -117,7 +121,7 @@ export async function GET(request: NextRequest) {
             User not found
           </div>
         ),
-        { width: 800, height: 250, headers: CACHE_HEADERS }
+        { width: 800, height: 250, headers: ERROR_CACHE_HEADERS }
       );
     }
 
@@ -229,7 +233,7 @@ export async function GET(request: NextRequest) {
           Error generating image
         </div>
       ),
-      { width: 800, height: 250, headers: CACHE_HEADERS }
+      { width: 800, height: 250, headers: ERROR_CACHE_HEADERS }
     );
   }
 }
